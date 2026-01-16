@@ -31,6 +31,11 @@ function loadConfig() {
     if (existsSync(configPath)) {
       const config = JSON.parse(readFileSync(configPath, 'utf-8'));
       
+      // S'assurer que security existe
+      if (!config.security) {
+        config.security = {};
+      }
+      
       // Ajouter les valeurs depuis .env si disponibles
       if (process.env.LOG_CHANNEL_ID) {
         config.logChannelId = process.env.LOG_CHANNEL_ID;
@@ -112,8 +117,18 @@ app.post('/api/system/:systemName/toggle', (req, res) => {
     return res.status(404).json({ error: 'Configuration non trouvée' });
   }
 
+  // S'assurer que config.security existe
+  if (!config.security) {
+    config.security = {};
+  }
+
   const systemName = req.params.systemName;
-  const systemPath = systemName.split('.');
+  // systemName est au format "security.antiRaid", on doit extraire juste "antiRaid"
+  const systemPath = systemName.split('.').filter(p => p !== 'security');
+  
+  if (systemPath.length === 0) {
+    return res.status(400).json({ error: 'Chemin système invalide' });
+  }
 
   let current = config.security;
   for (let i = 0; i < systemPath.length - 1; i++) {
@@ -128,13 +143,23 @@ app.post('/api/system/:systemName/toggle', (req, res) => {
     current[lastKey] = {};
   }
 
-  current[lastKey].enabled = !(current[lastKey].enabled || false);
+  // Obtenir l'état actuel (défaut: false si non défini)
+  const currentEnabled = current[lastKey].enabled === true;
+  const newEnabled = !currentEnabled;
+  
+  // Mettre à jour l'état
+  current[lastKey].enabled = newEnabled;
 
+  // Sauvegarder la configuration
   if (saveConfig(config)) {
+    // Recharger la config pour vérifier qu'elle a été sauvegardée
+    const savedConfig = loadConfig();
+    const savedEnabled = savedConfig?.security?.[lastKey]?.enabled === true;
+    
     res.json({ 
       success: true, 
-      enabled: current[lastKey].enabled,
-      message: `Système ${current[lastKey].enabled ? 'activé' : 'désactivé'}` 
+      enabled: savedEnabled, // Retourner l'état réel depuis le fichier
+      message: `Système ${savedEnabled ? 'activé' : 'désactivé'}` 
     });
   } else {
     res.status(500).json({ error: 'Erreur lors de la sauvegarde' });

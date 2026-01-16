@@ -5,13 +5,25 @@ let filteredSystems = [];
 // Charger les systèmes et la configuration
 async function loadData() {
     try {
+        // Réinitialiser la config pour éviter les états obsolètes
+        config = {};
+        
         const [systemsRes, configRes] = await Promise.all([
             fetch('/api/systems'),
             fetch('/api/config')
         ]);
 
+        if (!systemsRes.ok || !configRes.ok) {
+            throw new Error('Erreur lors du chargement des données');
+        }
+
         systems = await systemsRes.json();
         config = await configRes.json();
+        
+        // S'assurer que config.security existe
+        if (!config.security) {
+            config.security = {};
+        }
 
         renderSystems();
         updateStats();
@@ -19,7 +31,10 @@ async function loadData() {
         console.error('Erreur lors du chargement:', error);
         showToast('Erreur lors du chargement des données', 'error');
     } finally {
-        document.getElementById('loading').style.display = 'none';
+        const loadingElement = document.getElementById('loading');
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+        }
     }
 }
 
@@ -121,24 +136,36 @@ function getSystemPath(systemId) {
 
 // Obtenir l'état activé/désactivé
 function getSystemEnabled(path) {
-    const parts = path.split('.');
-    let current = config;
+    if (!config || !config.security) {
+        return false;
+    }
     
-    for (const part of parts) {
+    const parts = path.split('.');
+    // Ignorer 'security' car on commence déjà à partir de config.security
+    const relevantParts = parts.filter(p => p !== 'security');
+    
+    let current = config.security;
+    
+    for (const part of relevantParts) {
         if (current && typeof current === 'object' && part in current) {
             current = current[part];
         } else {
+            // Si le chemin n'existe pas, le système n'est pas configuré, donc désactivé
             return false;
         }
     }
     
-    return current?.enabled || false;
+    // Si enabled n'est pas défini explicitement, considérer comme false
+    return current !== null && current !== undefined && current.enabled === true;
 }
 
 // Toggle un système
 async function toggleSystem(systemId, toggleElement) {
     const systemPath = getSystemPath(systemId);
-    const systemName = systemPath.split('.').pop();
+    
+    // Désactiver le toggle pendant la requête pour éviter les clics multiples
+    toggleElement.style.pointerEvents = 'none';
+    const card = toggleElement.closest('.system-card');
     
     try {
         const response = await fetch(`/api/system/${systemPath}/toggle`, {
@@ -148,40 +175,49 @@ async function toggleSystem(systemId, toggleElement) {
         const data = await response.json();
 
         if (data.success) {
-            // Mettre à jour l'état local
-            const parts = systemPath.split('.');
-            let current = config;
-            for (let i = 0; i < parts.length - 1; i++) {
-                if (!current[parts[i]]) current[parts[i]] = {};
-                current = current[parts[i]];
+            // Recharger la config depuis le serveur pour avoir l'état réel
+            try {
+                const configRes = await fetch('/api/config');
+                config = await configRes.json();
+            } catch (error) {
+                console.error('Erreur lors du rechargement de la config:', error);
             }
-            if (!current[parts[parts.length - 1]]) {
-                current[parts[parts.length - 1]] = {};
-            }
-            current[parts[parts.length - 1]].enabled = data.enabled;
 
-            // Mettre à jour l'UI
-            const card = toggleElement.closest('.system-card');
-            if (data.enabled) {
+            // Mettre à jour l'UI avec l'état réel
+            const isEnabled = data.enabled;
+            
+            // Mettre à jour le toggle
+            if (isEnabled) {
                 toggleElement.classList.add('active');
                 card.classList.add('active');
                 card.classList.remove('inactive');
-                card.querySelector('.toggle-label').textContent = 'Activé';
             } else {
                 toggleElement.classList.remove('active');
                 card.classList.remove('active');
                 card.classList.add('inactive');
-                card.querySelector('.toggle-label').textContent = 'Désactivé';
+            }
+            
+            // Mettre à jour le label (s'assurer qu'il n'y a qu'un seul label)
+            const label = card.querySelector('.toggle-label');
+            if (label) {
+                label.textContent = isEnabled ? 'Activé' : 'Désactivé';
             }
 
             updateStats();
             showToast(data.message, 'success');
         } else {
             showToast('Erreur lors de la modification', 'error');
+            // Recharger la config en cas d'erreur pour restaurer l'état
+            await loadData();
         }
     } catch (error) {
         console.error('Erreur:', error);
         showToast('Erreur lors de la modification', 'error');
+        // Recharger la config en cas d'erreur
+        await loadData();
+    } finally {
+        // Réactiver le toggle
+        toggleElement.style.pointerEvents = '';
     }
 }
 
