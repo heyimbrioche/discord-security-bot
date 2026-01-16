@@ -1,0 +1,48 @@
+{
+  "name": "discord-security-bot",
+  "version": "1.0.0",
+  "description": "Bot de sécurité Discord révolutionnaire avec protection contre toutes les attaques connues",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "panel": "node panel/server.js"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "security",
+    "protection",
+    "anti-raid",
+    "anti-nuke",
+    "anti-spam",
+    "anti-phishing",
+    "discord-bot",
+    "discord-security",
+    "moderation",
+    "security-bot"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/discord-security-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/discord-security-bot/issues"
+  },
+  "homepage": "https://github.com/yourusername/discord-security-bot#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1",
+    "node-fetch": "^3.3.2",
+    "chalk": "^5.3.0",
+    "winston": "^3.11.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

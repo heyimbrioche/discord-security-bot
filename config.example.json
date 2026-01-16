@@ -1,0 +1,107 @@
+{
+  "prefix": "!",
+  "security": {
+    "antiRaid": {
+      "enabled": true,
+      "maxChannelsPerMinute": 2,
+      "maxRolesPerMinute": 2,
+      "maxBansPerMinute": 3,
+      "maxKicksPerMinute": 3,
+      "maxInvitesPerMinute": 2,
+      "maxMessagesPerSecond": 3,
+      "maxMentionsPerMessage": 5,
+      "actionOnDetection": "ban"
+    },
+    "antiSpam": {
+      "enabled": true,
+      "maxMessagesPer10Seconds": 5,
+      "maxSimilarMessages": 3,
+      "actionOnDetection": "mute"
+    },
+    "antiPhishing": {
+      "enabled": true,
+      "checkLinks": true,
+      "checkDomains": true,
+      "actionOnDetection": "delete"
+    },
+    "antiNuke": {
+      "enabled": true,
+      "maxPermissionChangesPerMinute": 3,
+      "maxChannelDeletionsPerMinute": 2,
+      "maxRoleDeletionsPerMinute": 2,
+      "actionOnDetection": "ban"
+    },
+    "behaviorAnalysis": {
+      "enabled": true,
+      "suspiciousActivityThreshold": 5,
+      "checkAccountAge": true,
+      "minAccountAgeDays": 7,
+      "checkVerificationLevel": true
+    },
+    "rateLimiting": {
+      "enabled": true,
+      "maxActionsPerUserPerMinute": 10,
+      "trackAllActions": true
+    },
+    "autoModeration": {
+      "enabled": true,
+      "deleteBadWords": true,
+      "preventCaps": true
+    },
+    "whitelistBlacklist": {
+      "enabled": false,
+      "whitelistOnly": false,
+      "whitelist": [],
+      "blacklist": []
+    },
+    "antiWebhook": {
+      "enabled": true,
+      "maxWebhooksPerMinute": 3,
+      "maxWebhookMessagesPer10Seconds": 5,
+      "actionOnDetection": "timeout"
+    },
+    "antiEmoji": {
+      "enabled": true,
+      "maxEmojisPerMinute": 5,
+      "maxEmojisPerMessage": 10,
+      "actionOnDetection": "timeout"
+    },
+    "antiSelfbot": {
+      "enabled": true,
+      "actionOnDetection": "ban"
+    },
+    "antiIntegration": {
+      "enabled": true,
+      "maxIntegrationsPerMinute": 2,
+      "suspiciousApplications": [],
+      "actionOnDetection": "ban"
+    },
+    "antiFile": {
+      "enabled": true,
+      "maxFilesPerMinute": 5,
+      "maxTotalSizePerMessage": 26214400,
+      "actionOnDangerousFile": "ban"
+    },
+    "antiThread": {
+      "enabled": true,
+      "maxThreadsPerMinute": 3,
+      "actionOnDetection": "timeout"
+    },
+    "antiReactionSpam": {
+      "enabled": true,
+      "maxReactionsPer10Seconds": 10,
+      "maxMessagesPer10Seconds": 5,
+      "actionOnDetection": "timeout"
+    },
+    "antiEmbedAbuse": {
+      "enabled": true,
+      "maxEmbedsPerMessage": 3,
+      "maxEmbedsPerMinute": 5,
+      "actionOnSuspiciousEmbed": "ban"
+    },
+    "antiTokenGrabber": {
+      "enabled": true,
+      "actionOnDetection": "ban"
+    }
+  }
+}
