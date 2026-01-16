@@ -12,7 +12,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+// Utiliser le port depuis .env ou 3000 par défaut
+const PORT = process.env.PANEL_PORT || process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -357,6 +358,17 @@ app.get('/api/systems', (req, res) => {
   res.json(systems);
 });
 
+// Démarrer le serveur avec gestion d'erreur pour le port
 app.listen(PORT, () => {
   console.log(`🚀 Panel de contrôle démarré sur http://localhost:${PORT}`);
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`❌ Le port ${PORT} est déjà utilisé.`);
+    console.log(`💡 Solutions:`);
+    console.log(`   1. Tuez le processus utilisant le port: netstat -ano | findstr :${PORT}`);
+    console.log(`   2. Utilisez un autre port: PANEL_PORT=3001 npm run panel`);
+    process.exit(1);
+  } else {
+    throw err;
+  }
 });

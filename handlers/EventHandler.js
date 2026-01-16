@@ -8,8 +8,8 @@ class EventHandler {
   }
 
   setupEvents() {
-    // Événement de connexion
-    this.client.on('ready', () => {
+    // Événement de connexion (utiliser clientReady pour éviter la dépréciation)
+    this.client.on('clientReady', () => {
       Logger.success('Tous les systèmes de sécurité sont opérationnels');
     });
 

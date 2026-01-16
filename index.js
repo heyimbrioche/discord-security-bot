@@ -75,6 +75,10 @@ const client = new Client({
   ]
 });
 
+// Augmenter la limite de listeners pour éviter les warnings
+// (Normal d'avoir plusieurs systèmes qui écoutent messageCreate)
+client.setMaxListeners(20);
+
 // Ajouter la config au client pour accès global
 client.config = botConfig;
 
@@ -107,8 +111,8 @@ client.commands = new Collection();
 const commandHandler = new CommandHandler(client);
 const eventHandler = new EventHandler(client, securitySystems);
 
-// Événement de démarrage
-client.once('ready', () => {
+// Événement de démarrage (utiliser clientReady pour éviter la dépréciation)
+client.once('clientReady', () => {
   Logger.success(`Bot connecté en tant que ${chalk.cyan(client.user.tag)}`);
   Logger.info(`Protection de ${chalk.yellow(client.guilds.cache.size)} serveur(s)`);
   
